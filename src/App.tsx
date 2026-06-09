@@ -24,7 +24,7 @@ import PageTransition from "./components/PageTransition";
 
 // Global axios config
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = ""; // Rely on relative paths / proxy
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || "";
 
 const queryClient = new QueryClient({
   defaultOptions: {
