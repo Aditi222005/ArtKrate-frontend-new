@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import Navbar from "./Navbar";
 import ArtworkCard from "./ArtworkCard";
+import { motion } from "framer-motion";
 
 const ArtworkSpecs = ({ artwork }: { artwork: any }) => (
   <div className="bg-surface border border-surface-border rounded-2xl p-6 md:p-8">
@@ -45,7 +46,7 @@ const RelatedArtworks = ({ currentArtworkId }: { currentArtworkId: string }) => 
   useEffect(() => {
     const fetchRelated = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/sellerpost/all?status=available");
+        const res = await axios.get("/api/sellerpost/all?status=available");
         const filtered = res.data.posts
           .filter((post: any) => post._id !== currentArtworkId)
           .slice(0, 4)
@@ -98,7 +99,7 @@ const ArtworkDetails = () => {
   useEffect(() => {
     const fetchArtwork = async () => {
       try {
-        const res = await axios.get(`http://localhost:4000/api/artwork/${id}`);
+        const res = await axios.get(`/api/artwork/${id}`);
         const fetched = res.data.artwork;
 
         const normalizedArtwork = {
@@ -121,7 +122,7 @@ const ArtworkDetails = () => {
           setIsLiked(fetched.likes?.includes(localStorage.getItem("userId") || ""));
           // Call view count increment API
           await axios.post(
-            `http://localhost:4000/api/artwork/${id}/view`,
+            `/api/artwork/${id}/view`,
             {},
             {
               headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -148,7 +149,7 @@ const ArtworkDetails = () => {
 
     try {
       const res = await axios.post(
-        `http://localhost:4000/api/artwork/${artwork._id}/like`,
+        `/api/artwork/${artwork._id}/like`,
         {},
         {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
@@ -190,6 +191,37 @@ const ArtworkDetails = () => {
     toast.success("Added to collection successfully!");
   };
 
+  const handleInquire = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please login first to message the seller.");
+      navigate("/login");
+      return;
+    }
+
+    const sellerId = artwork.sellerId?._id || artwork.sellerId;
+    if (!sellerId) {
+      toast.error("Seller details are not available.");
+      return;
+    }
+
+    try {
+      await axios.post(
+        "/api/messages",
+        {
+          receiverId: sellerId,
+          content: `Hi! I am interested in your artwork "${artwork.title}". Could you share more details?`,
+          artworkId: artwork._id
+        },
+        { withCredentials: true }
+      );
+      toast.success("Inquiry sent successfully!");
+      navigate(`/messages/${sellerId}`);
+    } catch (err) {
+      console.error("Inquiry error:", err);
+      toast.error("Failed to send inquiry.");
+    }
+  };
+
   const handleShare = () => {
     if (navigator.share) {
       navigator.share({
@@ -229,23 +261,35 @@ const ArtworkDetails = () => {
       <Navbar />
 
       <div className="max-w-7xl mx-auto px-6 pt-24 pb-6">
-        <Link to="/marketplace" className="inline-flex items-center gap-2 text-cream-muted hover:text-gold transition-colors text-sm mb-8">
-          <ArrowLeft className="w-4 h-4" />
-          Back to Marketplace
-        </Link>
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4 }}
+        >
+          <Link to="/marketplace" className="inline-flex items-center gap-2 text-cream-muted hover:text-gold transition-colors text-sm mb-8">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Marketplace
+          </Link>
+        </motion.div>
 
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* Artwork Image Frame */}
-          <div className="space-y-6">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 80, damping: 15 }}
+            className="space-y-6"
+          >
             <div className="relative group overflow-hidden bg-surface border border-surface-border rounded-2xl aspect-square flex items-center justify-center p-6 shadow-2xl">
-              <img
+              <motion.img
+                layout
                 src={artwork.image}
                 alt={artwork.title}
                 className={`max-w-full max-h-full object-contain transition-transform duration-700 ${imageZoomed ? 'scale-150' : 'group-hover:scale-105'}`}
               />
               <button
                 onClick={() => setImageZoomed(!imageZoomed)}
-                className="absolute top-4 right-4 p-2.5 glass rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:text-gold"
+                className="absolute top-4 right-4 p-2.5 glass rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:text-gold cursor-pointer"
                 aria-label="Zoom Image"
               >
                 <ZoomIn className="w-5 h-5 text-cream" />
@@ -255,32 +299,41 @@ const ArtworkDetails = () => {
             {/* Interaction Row */}
             <div className="flex items-center justify-between text-cream-muted text-sm px-1">
               <div className="flex items-center gap-6">
-                <span className="flex items-center gap-1.5"><Eye className="w-4 h-4" /> {artwork.views || 0} views</span>
-                <span className="flex items-center gap-1.5"><Heart className="w-4 h-4" /> {artwork.likesCount} saves</span>
+                <span className="flex items-center gap-1.5"><Eye className="w-4 h-4 text-gold/80" /> {artwork.views || 0} views</span>
+                <span className="flex items-center gap-1.5"><Heart className="w-4 h-4 text-terra/80" /> {artwork.likesCount} saves</span>
               </div>
               <div className="flex items-center gap-3">
-                <button
+                <motion.button
                   onClick={handleLike}
-                  className={`p-2.5 rounded-full border transition-colors ${
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  className={`p-2.5 rounded-full border transition-colors cursor-pointer ${
                     isLiked ? "border-terra/40 bg-terra/10 text-terra" : "border-surface-border hover:border-gold text-cream-muted"
                   }`}
                   aria-label="Like"
                 >
                   <Heart className={`w-4 h-4 ${isLiked ? 'fill-current' : ''}`} />
-                </button>
-                <button
+                </motion.button>
+                <motion.button
                   onClick={handleShare}
-                  className="p-2.5 rounded-full border border-surface-border hover:border-gold text-cream-muted transition-colors"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="p-2.5 rounded-full border border-surface-border hover:border-gold text-cream-muted transition-colors cursor-pointer"
                   aria-label="Share"
                 >
                   <Share2 className="w-4 h-4" />
-                </button>
+                </motion.button>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Product Actions Detail */}
-          <div className="space-y-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 80, damping: 15, delay: 0.1 }}
+            className="space-y-8"
+          >
             <div>
               <div className="flex items-center gap-3 mb-3">
                 <span className="text-gold text-xs font-semibold uppercase tracking-[0.2em]">{artwork.category}</span>
@@ -297,37 +350,57 @@ const ArtworkDetails = () => {
             <div className="divider-gold" />
 
             <div>
-              <h3 className="text-cream text-lg font-medium mb-3">Description</h3>
+              <h3 className="text-cream text-lg font-medium mb-3 font-display">Description</h3>
               <p className="text-cream-muted leading-relaxed font-sans">{artwork.description}</p>
             </div>
 
             <div className="flex gap-4">
-              <Button
-                onClick={handleAddToCart}
-                disabled={inCart}
-                className="flex-1 btn-terra text-base py-6"
-              >
-                {inCart ? "Already In Cart" : "Add to Cart"}
-              </Button>
-              <Button variant="outline" className="border-gold text-gold hover:bg-gold/10 py-6 px-8">
-                Inquire
-              </Button>
+              <motion.div className="flex-1" whileHover={{ scale: !inCart ? 1.02 : 1 }} whileTap={{ scale: !inCart ? 0.98 : 1 }}>
+                <Button
+                  onClick={handleAddToCart}
+                  disabled={inCart}
+                  className="w-full btn-terra text-base py-6"
+                >
+                  {inCart ? "Already In Cart" : "Add to Cart"}
+                </Button>
+              </motion.div>
+              <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <Button 
+                  onClick={handleInquire}
+                  variant="outline" 
+                  className="border-gold text-gold hover:bg-gold/10 py-6 px-8"
+                >
+                  Inquire
+                </Button>
+              </motion.div>
             </div>
 
             <div className="divider-gold" />
 
             {/* Artist Detail Card */}
             {artwork.artist && <ArtistSummary artist={artwork.artist} />}
-          </div>
+          </motion.div>
         </div>
 
-        <div className="mt-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.5 }}
+          className="mt-16"
+        >
           <ArtworkSpecs artwork={artwork} />
-        </div>
+        </motion.div>
 
-        <div className="mt-16">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+          className="mt-16"
+        >
           <RelatedArtworks currentArtworkId={artwork._id} />
-        </div>
+        </motion.div>
       </div>
     </div>
   );

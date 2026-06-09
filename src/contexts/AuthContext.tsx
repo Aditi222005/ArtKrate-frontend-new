@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const checkAuth = async () => {
     try {
-      const res = await axios.get("http://localhost:4000/api/check-auth", {
+      const res = await axios.get("/api/check-auth", {
         withCredentials: true,
       });
 

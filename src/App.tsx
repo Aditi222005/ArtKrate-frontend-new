@@ -15,14 +15,16 @@ import Artists from "./pages/Artists";
 import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
+import Messages from "./pages/Messages";
 import SellerDashboard from "./pages/SellerDashboard";
 import SellerProfile from "./pages/SellerProfile";
 import Cart from "./pages/Cart";
 import ArtworkDetails from "./components/ArtworkDetails";
+import PageTransition from "./components/PageTransition";
 
 // Global axios config
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = "http://localhost:4000";
+axios.defaults.baseURL = ""; // Rely on relative paths / proxy
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -62,18 +64,20 @@ const App = () => (
               }}
             />
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-              <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-              <Route path="/marketplace" element={<Marketplace />} />
-              <Route path="/artists" element={<Artists />} />
-              <Route path="/about" element={<About />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/artwork/:id" element={<ArtworkDetails />} />
-              <Route path="/dashboard" element={<SellerDashboard />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/artist/:id" element={<SellerProfile />} />
-              <Route path="*" element={<NotFound />} />
+              <Route path="/" element={<PageTransition><Index /></PageTransition>} />
+              <Route path="/login" element={<PublicRoute><PageTransition><Login /></PageTransition></PublicRoute>} />
+              <Route path="/signup" element={<PublicRoute><PageTransition><Signup /></PageTransition></PublicRoute>} />
+              <Route path="/marketplace" element={<PageTransition><Marketplace /></PageTransition>} />
+              <Route path="/artists" element={<PageTransition><Artists /></PageTransition>} />
+              <Route path="/about" element={<PageTransition><About /></PageTransition>} />
+              <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
+              <Route path="/messages" element={<PageTransition><Messages /></PageTransition>} />
+              <Route path="/messages/:userId" element={<PageTransition><Messages /></PageTransition>} />
+              <Route path="/artwork/:id" element={<PageTransition><ArtworkDetails /></PageTransition>} />
+              <Route path="/dashboard" element={<PageTransition><SellerDashboard /></PageTransition>} />
+              <Route path="/cart" element={<PageTransition><Cart /></PageTransition>} />
+              <Route path="/artist/:id" element={<PageTransition><SellerProfile /></PageTransition>} />
+              <Route path="*" element={<PageTransition><NotFound /></PageTransition>} />
             </Routes>
           </TooltipProvider>
         </CartProvider>

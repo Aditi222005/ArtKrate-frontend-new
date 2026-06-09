@@ -23,7 +23,7 @@ const SellerProfile = () => {
 
     const fetchSeller = async () => {
       try {
-        const res = await axios.get(`http://localhost:4000/api/sellerprofile/${id}`, {
+        const res = await axios.get(`/api/sellerprofile/${id}`, {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           withCredentials: true,
         });
@@ -41,7 +41,7 @@ const SellerProfile = () => {
 
   const handleFollow = async () => {
     try {
-      const res = await axios.post(`http://localhost:4000/api/follow/${id}`, {}, {
+      const res = await axios.post(`/api/follow/${id}`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         withCredentials: true,
       });

@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import ArtworkCard from "@/components/ArtworkCard";
 import axios from "axios";
 import { toast } from "sonner";
+import { motion, AnimatePresence } from "framer-motion";
 
 const categories = [
   { value: "all", label: "All Categories" },
@@ -52,7 +53,7 @@ const Marketplace = () => {
       if (priceMax) params.priceMax = priceMax;
       if (searchQuery) params.search = searchQuery;
 
-      const res = await axios.get("http://localhost:4000/api/sellerpost/all", {
+      const res = await axios.get("/api/sellerpost/all", {
         params,
         withCredentials: true
       });
@@ -133,112 +134,123 @@ const Marketplace = () => {
             </button>
           </div>
 
-          <div className="grid lg:grid-cols-4 gap-8">
+          <motion.div layout className="grid lg:grid-cols-4 gap-8">
             {/* ── Filter Sidebar ──────────────────────────────── */}
-            {showFilters && (
-              <div className="lg:col-span-1 space-y-6 bg-surface border border-surface-border rounded-2xl p-6 h-fit shrink-0">
-                <div className="flex items-center justify-between border-b border-surface-border/50 pb-4">
-                  <h3 className="font-display text-cream text-lg flex items-center gap-2">
-                    <Filter className="w-4 h-4 text-gold" /> Filter Art
-                  </h3>
-                  <button
-                    onClick={handleClearFilters}
-                    className="text-xs text-gold hover:text-gold/80 transition-colors"
-                  >
-                    Reset All
-                  </button>
-                </div>
-
-                {/* Categories */}
-                <div className="space-y-2.5">
-                  <label className="text-cream-muted text-xs tracking-wider uppercase">Categories</label>
-                  <div className="flex flex-col gap-1.5">
-                    {categories.map((cat) => (
-                      <button
-                        key={cat.value}
-                        onClick={() => setCategoryFilter(cat.value)}
-                        className={`text-left text-sm py-1 px-2.5 rounded transition-all ${
-                          categoryFilter === cat.value
-                            ? "bg-gold/10 text-gold font-medium border-l-2 border-gold pl-2"
-                            : "text-cream-subtle hover:text-cream hover:bg-surface-raised pl-2"
-                        }`}
-                      >
-                        {cat.label}
-                      </button>
-                    ))}
+            <AnimatePresence initial={false}>
+              {showFilters && (
+                <motion.div
+                  initial={{ opacity: 0, x: -30, width: 0 }}
+                  animate={{ opacity: 1, x: 0, width: "auto" }}
+                  exit={{ opacity: 0, x: -30, width: 0 }}
+                  transition={{ type: "spring", stiffness: 150, damping: 22 }}
+                  className="lg:col-span-1 space-y-6 bg-surface border border-surface-border rounded-2xl p-6 h-fit shrink-0 overflow-hidden"
+                >
+                  <div className="flex items-center justify-between border-b border-surface-border/50 pb-4">
+                    <h3 className="font-display text-cream text-lg flex items-center gap-2">
+                      <Filter className="w-4 h-4 text-gold" /> Filter Art
+                    </h3>
+                    <button
+                      onClick={handleClearFilters}
+                      className="text-xs text-gold hover:text-gold/80 transition-colors"
+                    >
+                      Reset All
+                    </button>
                   </div>
-                </div>
 
-                {/* Medium */}
-                <div className="space-y-2">
-                  <label className="text-cream-muted text-xs tracking-wider uppercase">Medium</label>
-                  <select
-                    value={selectedMedium}
-                    onChange={(e) => setSelectedMedium(e.target.value)}
-                    className="input-dark text-sm"
-                  >
-                    <option value="all">All Mediums</option>
-                    {mediums.map((m) => (
-                      <option key={m} value={m}>{m}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Style */}
-                <div className="space-y-2">
-                  <label className="text-cream-muted text-xs tracking-wider uppercase">Style</label>
-                  <select
-                    value={selectedStyle}
-                    onChange={(e) => setSelectedStyle(e.target.value)}
-                    className="input-dark text-sm"
-                  >
-                    <option value="all">All Styles</option>
-                    {styles.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Orientation */}
-                <div className="space-y-2">
-                  <label className="text-cream-muted text-xs tracking-wider uppercase">Orientation</label>
-                  <select
-                    value={selectedOrientation}
-                    onChange={(e) => setSelectedOrientation(e.target.value)}
-                    className="input-dark text-sm"
-                  >
-                    {orientations.map((o) => (
-                      <option key={o.value} value={o.value}>{o.label}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Price range */}
-                <div className="space-y-2">
-                  <label className="text-cream-muted text-xs tracking-wider uppercase">Price Range (INR)</label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      placeholder="Min"
-                      type="number"
-                      value={priceMin}
-                      onChange={(e) => setPriceMin(e.target.value)}
-                      className="input-dark text-sm py-1.5"
-                    />
-                    <span className="text-cream-subtle text-xs">to</span>
-                    <input
-                      placeholder="Max"
-                      type="number"
-                      value={priceMax}
-                      onChange={(e) => setPriceMax(e.target.value)}
-                      className="input-dark text-sm py-1.5"
-                    />
+                  {/* Categories */}
+                  <div className="space-y-2.5">
+                    <label className="text-cream-muted text-xs tracking-wider uppercase">Categories</label>
+                    <div className="flex flex-col gap-1.5">
+                      {categories.map((cat) => (
+                        <button
+                          key={cat.value}
+                          onClick={() => setCategoryFilter(cat.value)}
+                          className={`text-left text-sm py-1 px-2.5 rounded transition-all ${
+                            categoryFilter === cat.value
+                              ? "bg-gold/10 text-gold font-medium border-l-2 border-gold pl-2"
+                              : "text-cream-subtle hover:text-cream hover:bg-surface-raised pl-2"
+                          }`}
+                        >
+                          {cat.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              </div>
-            )}
+
+                  {/* Medium */}
+                  <div className="space-y-2">
+                    <label className="text-cream-muted text-xs tracking-wider uppercase">Medium</label>
+                    <select
+                      value={selectedMedium}
+                      onChange={(e) => setSelectedMedium(e.target.value)}
+                      className="input-dark text-sm"
+                    >
+                      <option value="all">All Mediums</option>
+                      {mediums.map((m) => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Style */}
+                  <div className="space-y-2">
+                    <label className="text-cream-muted text-xs tracking-wider uppercase">Style</label>
+                    <select
+                      value={selectedStyle}
+                      onChange={(e) => setSelectedStyle(e.target.value)}
+                      className="input-dark text-sm"
+                    >
+                      <option value="all">All Styles</option>
+                      {styles.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Orientation */}
+                  <div className="space-y-2">
+                    <label className="text-cream-muted text-xs tracking-wider uppercase">Orientation</label>
+                    <select
+                      value={selectedOrientation}
+                      onChange={(e) => setSelectedOrientation(e.target.value)}
+                      className="input-dark text-sm"
+                    >
+                      {orientations.map((o) => (
+                        <option key={o.value} value={o.value}>{o.label}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Price range */}
+                  <div className="space-y-2">
+                    <label className="text-cream-muted text-xs tracking-wider uppercase">Price Range (INR)</label>
+                    <div className="flex items-center gap-2">
+                      <input
+                        placeholder="Min"
+                        type="number"
+                        value={priceMin}
+                        onChange={(e) => setPriceMin(e.target.value)}
+                        className="input-dark text-sm py-1.5"
+                      />
+                      <span className="text-cream-subtle text-xs">to</span>
+                      <input
+                        placeholder="Max"
+                        type="number"
+                        value={priceMax}
+                        onChange={(e) => setPriceMax(e.target.value)}
+                        className="input-dark text-sm py-1.5"
+                      />
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* ── Content Grid ────────────────────────────────── */}
-            <div className={`${showFilters ? "lg:col-span-3" : "lg:col-span-4"} space-y-6`}>
+            <motion.div
+              layout
+              className={`${showFilters ? "lg:col-span-3" : "lg:col-span-4"} space-y-6`}
+            >
               {/* Search + Sorting controls bar */}
               <div className="bg-surface border border-surface-border rounded-2xl p-4 flex flex-col sm:flex-row gap-3 items-center">
                 <div className="relative flex-1 w-full">
@@ -301,17 +313,20 @@ const Marketplace = () => {
               {loading ? (
                 <div className="text-center py-20 text-gold animate-pulse">Loading Artworks...</div>
               ) : sortedArtworks.length > 0 ? (
-                <div
+                <motion.div
+                  layout
                   className={`grid gap-6 ${
                     viewMode === "grid"
                       ? "grid-cols-1 sm:grid-cols-2 xl:grid-cols-3"
                       : "grid-cols-1"
                   }`}
                 >
-                  {sortedArtworks.map((art) => (
-                    <ArtworkCard key={art.id} artwork={art} />
-                  ))}
-                </div>
+                  <AnimatePresence mode="popLayout">
+                    {sortedArtworks.map((art, idx) => (
+                      <ArtworkCard key={art.id} artwork={art} delay={idx * 50} />
+                    ))}
+                  </AnimatePresence>
+                </motion.div>
               ) : (
                 <div className="text-center py-20 bg-surface border border-surface-border rounded-2xl">
                   <p className="font-display text-cream text-lg mb-2">No Artworks Found</p>
@@ -324,8 +339,8 @@ const Marketplace = () => {
                   </button>
                 </div>
               )}
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </div>

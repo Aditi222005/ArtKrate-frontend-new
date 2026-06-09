@@ -19,7 +19,7 @@ const MyArtwork = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/sellerpost/mine", {
+        const res = await axios.get("/api/sellerpost/mine", {
           withCredentials: true,
         });
         setArtworks(res.data || []);
@@ -64,7 +64,7 @@ const MyArtwork = () => {
     if (!confirmDelete) return;
 
     try {
-      await axios.delete(`http://localhost:4000/api/sellerpost/${id}`, {
+      await axios.delete(`/api/sellerpost/${id}`, {
         withCredentials: true,
       });
 

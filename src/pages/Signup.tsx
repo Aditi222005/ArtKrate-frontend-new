@@ -47,7 +47,7 @@ const Signup = () => {
           formPayload.append(key, formData[key as keyof typeof formData] as string | Blob);
         }
       }
-      await axios.post("http://localhost:4000/api/signup", formPayload, {
+      await axios.post("/api/signup", formPayload, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       toast.success("Account created! Welcome to ArtKrate.");

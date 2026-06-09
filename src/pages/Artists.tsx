@@ -18,7 +18,7 @@ const Artists = () => {
   useEffect(() => {
     const fetchArtists = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/sellerpost/artists", {
+        const res = await axios.get("/api/sellerpost/artists", {
           headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
           withCredentials: true,
         });
@@ -54,7 +54,7 @@ const Artists = () => {
   const handleFollow = async (artistId: string) => {
     if (!isAuthenticated) { navigate("/login"); return; }
     try {
-      const res = await axios.post(`http://localhost:4000/api/follow/${artistId}`, {}, {
+      const res = await axios.post(`/api/follow/${artistId}`, {}, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
         withCredentials: true,
       });

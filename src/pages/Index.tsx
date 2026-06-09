@@ -6,6 +6,7 @@ import ArtworkCard from "@/components/ArtworkCard";
 import AnimatedCounter from "../components/AnimatedCounter";
 import axios from "axios";
 import { useAuth } from "@/contexts/AuthContext";
+import { motion } from "framer-motion";
 
 // ── useScrollReveal hook ─────────────────────────────────────────────────────
 const useScrollReveal = () => {
@@ -56,6 +57,30 @@ const featuredArtworks = [
   },
 ];
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.12,
+      delayChildren: 0.1,
+    }
+  }
+} as const;
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 25 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      type: "spring" as const,
+      stiffness: 85,
+      damping: 14
+    }
+  }
+};
+
 const Index = () => {
   const [isVisible, setIsVisible] = useState(false);
   const { isAuthenticated, user } = useAuth();
@@ -82,46 +107,47 @@ const Index = () => {
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 pt-24 pb-16 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           {/* ── Left: Editorial Copy ─────────────────── */}
-          <div
-            className={`transition-all duration-1000 ${
-              isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
-            }`}
+          <motion.div
+            variants={containerVariants}
+            initial="hidden"
+            animate={isVisible ? "show" : "hidden"}
+            className="space-y-6"
           >
-            <div className="mb-6">
+            <motion.div variants={itemVariants} className="mb-2">
               <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-gold/30 bg-gold/8 text-gold text-xs tracking-[0.15em] uppercase">
-                <Sparkles className="w-3 h-3" />
+                <Sparkles className="w-3 h-3 animate-spin" style={{ animationDuration: '4s' }} />
                 Curated Indian Art Marketplace
               </span>
-            </div>
+            </motion.div>
 
-            <h1 className="font-display text-cream leading-[1.05] mb-6">
+            <motion.h1 variants={itemVariants} className="font-display text-cream leading-[1.05] mb-2">
               Where Art<br />
               <span className="text-gold-gradient italic">Finds Its</span><br />
               Collector
-            </h1>
+            </motion.h1>
 
-            <p className="text-cream-muted text-lg leading-relaxed mb-8 max-w-md">
+            <motion.p variants={itemVariants} className="text-cream-muted text-lg leading-relaxed mb-4 max-w-md">
               ArtKrate connects verified artists with passionate collectors across India.
               Discover paintings, sculptures, digital art — each piece with a story.
-            </p>
+            </motion.p>
 
-            <div className="flex flex-col sm:flex-row gap-4 mb-10">
+            <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 mb-4">
               <Link
                 to="/marketplace"
-                className="btn-terra flex items-center justify-center gap-2 text-base"
+                className="btn-terra flex items-center justify-center gap-2 text-base group"
               >
                 Explore Gallery
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Link>
               {!isAuthenticated && (
                 <Link to="/signup" className="btn-gold-outline flex items-center justify-center gap-2 text-base">
                   Join as Artist
                 </Link>
               )}
-            </div>
+            </motion.div>
 
             {/* Mini Stats */}
-            <div className="flex items-center gap-8">
+            <motion.div variants={itemVariants} className="flex items-center gap-8 pt-4">
               <div>
                 <p className="text-cream font-display text-2xl font-bold">2,500+</p>
                 <p className="text-cream-subtle text-xs tracking-wide">Verified Artists</p>
@@ -136,36 +162,49 @@ const Index = () => {
                 <p className="text-cream font-display text-2xl font-bold">500+</p>
                 <p className="text-cream-subtle text-xs tracking-wide">New Weekly</p>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
 
           {/* ── Right: Floating Artwork Stack ────────── */}
-          <div
-            className={`relative h-[520px] hidden lg:block transition-all duration-1000 delay-300 ${
-              isVisible ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
-            }`}
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            animate={isVisible ? { opacity: 1, x: 0 } : { opacity: 0, x: 30 }}
+            transition={{ type: "spring", stiffness: 60, damping: 15, delay: 0.3 }}
+            className="relative h-[520px] hidden lg:block"
           >
             {/* Large back card */}
-            <div className="absolute top-8 right-0 w-52 h-72 rounded-2xl overflow-hidden shadow-2xl float-artwork border border-gold/20">
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: 2, zIndex: 30 }}
+              transition={{ duration: 0.3 }}
+              className="absolute top-8 right-0 w-52 h-72 rounded-2xl overflow-hidden shadow-2xl float-artwork border border-gold/20 cursor-pointer"
+            >
               <img
                 src="https://images.unsplash.com/photo-1547826039-bfc35e0f1ea8?w=400&h=600&fit=crop"
                 alt="Featured artwork"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-canvas/60 to-transparent" />
-            </div>
+            </motion.div>
 
             {/* Middle card */}
-            <div className="absolute top-24 left-4 w-48 h-64 rounded-2xl overflow-hidden shadow-xl float-artwork-delay border border-surface-border">
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: -2, zIndex: 30 }}
+              transition={{ duration: 0.3 }}
+              className="absolute top-24 left-4 w-48 h-64 rounded-2xl overflow-hidden shadow-xl float-artwork-delay border border-surface-border cursor-pointer"
+            >
               <img
                 src="https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=560&fit=crop"
                 alt="Featured artwork"
                 className="w-full h-full object-cover"
               />
-            </div>
+            </motion.div>
 
             {/* Small foreground card */}
-            <div className="absolute bottom-4 right-16 w-44 h-56 rounded-2xl overflow-hidden shadow-2xl float-artwork border border-gold/30">
+            <motion.div
+              whileHover={{ scale: 1.05, rotate: 1, zIndex: 30 }}
+              transition={{ duration: 0.3 }}
+              className="absolute bottom-4 right-16 w-44 h-56 rounded-2xl overflow-hidden shadow-2xl float-artwork border border-gold/30 cursor-pointer"
+            >
               <img
                 src="https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=360&h=480&fit=crop"
                 alt="Featured artwork"
@@ -175,13 +214,13 @@ const Index = () => {
               <div className="absolute bottom-3 left-3 px-2.5 py-1 glass rounded-lg">
                 <p className="text-gold text-xs font-semibold">₹45,000</p>
               </div>
-            </div>
+            </motion.div>
 
             {/* Editorial label */}
             <div className="absolute top-0 left-0 -rotate-12 bg-terra/90 text-cream text-[10px] tracking-widest uppercase px-3 py-1 rounded">
               New Drop
             </div>
-          </div>
+          </motion.div>
         </div>
 
         {/* Scroll indicator */}

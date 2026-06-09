@@ -75,7 +75,7 @@ const SellerDashboard = () => {
     const formData = new FormData();
     formData.append("image", file);
     try {
-      const res = await axios.post("http://localhost:3000/api/analyze-art", formData, {
+      const res = await axios.post("/api/ai/analyze-art", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });
@@ -132,7 +132,7 @@ const SellerDashboard = () => {
     selectedFiles.forEach(({ file }) => formData.append("images", file));
 
     try {
-      await axios.post("http://localhost:4000/api/sellerpost/create", formData, {
+      await axios.post("/api/sellerpost/create", formData, {
         withCredentials: true,
         headers: { "Content-Type": "multipart/form-data" },
       });

@@ -3,12 +3,13 @@ import {
   User, Mail, Phone, MapPin, Edit, Camera,
   Heart, ShoppingBag, Palette, Star, TrendingUp, Save, X, Loader2,
   Calendar, ChevronRight, CreditCard, CheckCircle2, Clock, AlertTriangle,
-  Trash2, ExternalLink, Package, Bell, MessageSquare, Plus, FileText
+  Trash2, ExternalLink, Package, Bell, MessageSquare, Plus, FileText, Compass
 } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import Navbar from "@/components/Navbar";
+import ChatModule from "@/components/ChatModule";
 
 // ── Order Tracking Timeline ──────────────────────────────────────────────────
 const OrderTrackingTimeline = ({ status }: { status: string }) => {
@@ -71,8 +72,10 @@ const OrderTrackingTimeline = ({ status }: { status: string }) => {
 };
 
 const Profile = () => {
+  const location = useLocation();
+  const [selectedChatUserId, setSelectedChatUserId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
-    "profile" | "artworks" | "activity" | "orders" | "wishlist" | "following" | "addresses" | "payments" | "reviews" | "notifications"
+    "profile" | "messages" | "artworks" | "activity" | "orders" | "wishlist" | "following" | "addresses" | "payments" | "reviews" | "notifications"
   >("profile");
   const [isEditing, setIsEditing] = useState(false);
   const [userProfile, setUserProfile] = useState({
@@ -126,6 +129,56 @@ const Profile = () => {
   const [addressZip, setAddressZip] = useState("");
   const [addressCountry, setAddressCountry] = useState("India");
   const [addressDefault, setAddressDefault] = useState(false);
+  const [detectingLocation, setDetectingLocation] = useState(false);
+
+  const handleDetectLocation = () => {
+    setDetectingLocation(true);
+
+    const callLocationAPI = async (lat?: number, lon?: number) => {
+      try {
+        const res = await axios.post("/api/ai/detect-location", {
+          latitude: lat,
+          longitude: lon
+        }, { withCredentials: true });
+
+        if (res.data && res.data.success) {
+          if (res.data.country) setAddressCountry(res.data.country);
+          if (res.data.city) setAddressCity(res.data.city);
+          if (res.data.state) setAddressState(res.data.state);
+          if (res.data.zipCode) setAddressZip(res.data.zipCode);
+          
+          const streetInfo = res.data.road || res.data.formattedAddress || "";
+          if (streetInfo) setAddressStreet(streetInfo);
+
+          toast.success("Location autofilled successfully!");
+        } else {
+          toast.error("Failed to parse location details.");
+        }
+      } catch (err) {
+        console.error("Detect location error:", err);
+        toast.error("Error connecting to location detection service.");
+      } finally {
+        setDetectingLocation(false);
+      }
+    };
+
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          callLocationAPI(latitude, longitude);
+        },
+        (error) => {
+          console.warn("Browser GPS permission denied or failed. Falling back to IP-based detection.", error);
+          callLocationAPI();
+        },
+        { timeout: 7000 }
+      );
+    } else {
+      console.warn("Geolocation API not supported by browser. Falling back to IP-based detection.");
+      callLocationAPI();
+    }
+  };
 
   // Payment Form State
   const [showPaymentForm, setShowPaymentForm] = useState(false);
@@ -171,6 +224,15 @@ const Profile = () => {
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+    if (location.state?.openChatWith) {
+      setSelectedChatUserId(location.state.openChatWith);
+    }
+  }, [location.state]);
 
   // Fetch tab content on changes
   useEffect(() => {
@@ -528,11 +590,13 @@ const Profile = () => {
   const tabs = userProfile.userType === "seller"
     ? ([
         { key: "profile", label: "Profile", icon: User },
+        { key: "messages", label: "Messages", icon: MessageSquare },
         { key: "artworks", label: "My Listings", icon: Palette },
         { key: "activity", label: "Activity", icon: TrendingUp },
       ] as const)
     : ([
         { key: "profile", label: "Profile", icon: User },
+        { key: "messages", label: "Messages", icon: MessageSquare },
         { key: "orders", label: "Orders", icon: ShoppingBag },
         { key: "wishlist", label: "Wishlist", icon: Heart },
         { key: "following", label: "Artists", icon: User },
@@ -675,6 +739,14 @@ const Profile = () => {
                   </button>
                 ))}
               </div>
+
+              {/* Messages Tab */}
+              {activeTab === "messages" && (
+                <ChatModule
+                  initialChatUserId={selectedChatUserId}
+                  currentUserId={userProfile._id}
+                />
+              )}
 
               {/* Profile Tab */}
               {activeTab === "profile" && (
@@ -882,6 +954,28 @@ const Profile = () => {
 
                   {showAddressForm && (
                     <form onSubmit={handleAddAddress} className="bg-surface-raised border border-surface-border rounded-xl p-4 space-y-4 animate-in fade-in">
+                      <div className="flex justify-between items-center bg-surface p-2.5 rounded-lg border border-surface-border/40 mb-2">
+                        <span className="text-cream-muted text-xs flex items-center gap-1.5">
+                          <MapPin className="w-3.5 h-3.5 text-gold" /> Autofill address details instantly using AI
+                        </span>
+                        <button
+                          type="button"
+                          onClick={handleDetectLocation}
+                          disabled={detectingLocation}
+                          className="btn-gold flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all duration-200"
+                        >
+                          {detectingLocation ? (
+                            <>
+                              <Loader2 className="w-3 h-3 animate-spin" /> Detecting...
+                            </>
+                          ) : (
+                            <>
+                              <Compass className="w-3 h-3" /> Detect Location
+                            </>
+                          )}
+                        </button>
+                      </div>
+
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="text-cream-muted text-xs block mb-1">Label (e.g. Home, Office)</label>

@@ -44,7 +44,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     if (loading || !isAuthenticated) return;
 
     axios
-      .get("http://localhost:4000/api/cart", { withCredentials: true })
+      .get("/api/cart", { withCredentials: true })
       .then((res) => {
         if (res.data.cart?.items) {
           setCartItems(
@@ -71,7 +71,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     if (exists) return;
 
     try {
-      const res = await axios.post(`http://localhost:4000/api/cart/add/${artwork.id}`, {}, {
+      const res = await axios.post(`/api/cart/add/${artwork.id}`, {}, {
         withCredentials: true,
       });
 
@@ -85,7 +85,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
   const removeFromCart = async (artworkId: string) => {
     try {
-      await axios.delete(`http://localhost:4000/api/cart/remove/${artworkId}`, {
+      await axios.delete(`/api/cart/remove/${artworkId}`, {
         withCredentials: true,
       });
 
@@ -119,7 +119,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
   // ✅ New clearCart method
   const clearCart = () => {
     setCartItems([]); // frontend
-    axios.delete("http://localhost:4000/api/cart/clear", { withCredentials: true }) // backend
+    axios.delete("/api/cart/clear", { withCredentials: true }) // backend
       .catch((err) => console.error("Failed to clear cart on backend", err));
   };
 

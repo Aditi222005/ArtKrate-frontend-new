@@ -70,9 +70,14 @@ const CheckoutDialog = ({ isOpen, onOpenChange, total }: CheckoutDialogProps) =>
   const { cartItems, clearCart } = useCart();
   const { user } = useAuth();
 
+  const [paymentMethod, setPaymentMethod] = useState<"razorpay" | "cod">("razorpay");
+
   // Reset step when dialog opens
   useEffect(() => {
-    if (isOpen) setStep("summary");
+    if (isOpen) {
+      setStep("summary");
+      setPaymentMethod("razorpay");
+    }
   }, [isOpen]);
 
   const handleRazorpayPayment = async () => {
@@ -160,6 +165,33 @@ const CheckoutDialog = ({ isOpen, onOpenChange, total }: CheckoutDialogProps) =>
     }
   };
 
+  const handleCODPayment = async () => {
+    setStep("processing");
+
+    try {
+      const { data } = await axios.post(
+        "/api/payment/cod",
+        { cartItems: cartItems.map((item) => item.id) },
+        { withCredentials: true }
+      );
+
+      const codRefId = data.orders?.[0]?.paymentId || "COD";
+      setPaymentId(codRefId);
+      setStep("success");
+      clearCart();
+
+      toast.success("COD Order placed successfully!", {
+        duration: 5000,
+        icon: "📦",
+      });
+    } catch (err: any) {
+      console.error("COD Checkout error:", err);
+      const message = err.response?.data?.message || "Failed to place COD order. Please try again.";
+      toast.error(message);
+      setStep("failed");
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={step === "processing" ? undefined : onOpenChange}>
       <DialogContent className="max-w-md bg-surface border-surface-border text-cream">
@@ -199,22 +231,62 @@ const CheckoutDialog = ({ isOpen, onOpenChange, total }: CheckoutDialogProps) =>
               ))}
             </div>
 
+            {/* Payment Method Selection */}
+            <div className="space-y-2">
+              <label className="text-cream-muted text-xs font-semibold block">Select Payment Method</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("razorpay")}
+                  className={`flex items-center justify-center gap-2 p-3 rounded-lg border text-xs font-semibold transition-all duration-200 ${
+                    paymentMethod === "razorpay"
+                      ? "border-gold bg-gold/10 text-gold shadow-[0_0_12px_rgba(201,168,76,0.1)]"
+                      : "border-surface-border bg-surface-raised text-cream-muted hover:border-surface-border/80 hover:text-cream"
+                  }`}
+                >
+                  <CreditCard className="w-3.5 h-3.5" />
+                  Pay Online
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod("cod")}
+                  className={`flex items-center justify-center gap-2 p-3 rounded-lg border text-xs font-semibold transition-all duration-200 ${
+                    paymentMethod === "cod"
+                      ? "border-gold bg-gold/10 text-gold shadow-[0_0_12px_rgba(201,168,76,0.1)]"
+                      : "border-surface-border bg-surface-raised text-cream-muted hover:border-surface-border/80 hover:text-cream"
+                  }`}
+                >
+                  <Package className="w-3.5 h-3.5" />
+                  Cash on Delivery
+                </button>
+              </div>
+            </div>
+
             {/* Total */}
             <div className="divider-gold" />
-            <div className="flex items-center justify-between text-lg font-semibold">
+            <div className="flex items-center justify-between text-base font-semibold">
               <span className="text-cream-muted">Total</span>
-              <span className="text-gold font-display text-xl">
+              <span className="text-gold font-display text-lg">
                 ₹{total.toLocaleString("en-IN")}
               </span>
             </div>
 
-            {/* Security note */}
-            <div className="flex items-start gap-2 p-3 rounded-lg bg-gold-muted/10 border border-gold-muted/20">
-              <Shield className="w-4 h-4 text-gold mt-0.5 shrink-0" />
-              <p className="text-cream-subtle text-xs leading-relaxed">
-                Your payment is secured by Razorpay. We never store card details.
-              </p>
-            </div>
+            {/* Security or COD note */}
+            {paymentMethod === "razorpay" ? (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-gold-muted/10 border border-gold-muted/20">
+                <Shield className="w-4 h-4 text-gold mt-0.5 shrink-0" />
+                <p className="text-cream-subtle text-xs leading-relaxed">
+                  Your payment is secured by Razorpay. We never store card details.
+                </p>
+              </div>
+            ) : (
+              <div className="flex items-start gap-2 p-3 rounded-lg bg-gold-muted/10 border border-gold-muted/20">
+                <Package className="w-4 h-4 text-gold mt-0.5 shrink-0" />
+                <p className="text-cream-subtle text-xs leading-relaxed">
+                  Pay securely with cash or UPI to the delivery courier when your artwork arrives.
+                </p>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex gap-3">
@@ -225,11 +297,20 @@ const CheckoutDialog = ({ isOpen, onOpenChange, total }: CheckoutDialogProps) =>
                 Cancel
               </button>
               <button
-                onClick={handleRazorpayPayment}
+                onClick={paymentMethod === "razorpay" ? handleRazorpayPayment : handleCODPayment}
                 className="flex-1 btn-terra text-sm py-2.5 flex items-center justify-center gap-2"
               >
-                <CreditCard className="w-4 h-4" />
-                Pay ₹{total.toLocaleString("en-IN")}
+                {paymentMethod === "razorpay" ? (
+                  <>
+                    <CreditCard className="w-4 h-4" />
+                    Pay ₹{total.toLocaleString("en-IN")}
+                  </>
+                ) : (
+                  <>
+                    <Package className="w-4 h-4" />
+                    Place COD Order
+                  </>
+                )}
               </button>
             </div>
           </div>
@@ -257,19 +338,27 @@ const CheckoutDialog = ({ isOpen, onOpenChange, total }: CheckoutDialogProps) =>
               <CheckCircle className="w-9 h-9 text-green-400" />
             </div>
             <div className="text-center space-y-2">
-              <p className="font-display text-cream text-xl">Payment Successful!</p>
+              <p className="font-display text-cream text-xl">
+                {paymentMethod === "cod" ? "Order Placed Successfully!" : "Payment Successful!"}
+              </p>
               <p className="text-cream-subtle text-sm">
-                Your artwork purchase has been confirmed.
+                {paymentMethod === "cod" 
+                  ? "Your Cash on Delivery order is registered." 
+                  : "Your artwork purchase has been confirmed."}
               </p>
               {paymentId && (
                 <p className="text-cream-subtle text-xs font-mono bg-surface-raised px-3 py-1 rounded">
-                  ID: {paymentId}
+                  {paymentMethod === "cod" ? "Reference ID: " : "ID: "}{paymentId}
                 </p>
               )}
             </div>
             <div className="flex items-center gap-2 text-cream-subtle text-sm">
               <Package className="w-4 h-4 text-gold" />
-              <span>The seller will contact you for delivery details.</span>
+              <span>
+                {paymentMethod === "cod" 
+                  ? "Please pay when the artwork is delivered to your address." 
+                  : "The seller will contact you for delivery details."}
+              </span>
             </div>
             <button
               onClick={() => onOpenChange(false)}

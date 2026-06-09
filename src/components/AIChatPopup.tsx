@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Send, Paperclip, X, Sparkles, Bot } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface Message {
   id: string;
@@ -130,7 +131,7 @@ const AIChatPopup: React.FC = () => {
       formData.append("message", userMsg.content);
       if (imageFile) formData.append("image", imageFile);
 
-      const res = await axios.post("http://localhost:3000/api/ai-chatbox", formData, {
+      const res = await axios.post("/api/ai/ai-chatbox", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });
@@ -167,13 +168,18 @@ const AIChatPopup: React.FC = () => {
     <Dialog open={open} onOpenChange={setOpen}>
       {/* ── Floating Trigger ─────────────────────────────── */}
       <DialogTrigger asChild>
-        <button
-          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-gold to-ochre text-canvas flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-transform animate-pulse-gold"
+        <motion.button
+          initial={{ scale: 0, rotate: -45 }}
+          animate={{ scale: 1, rotate: 0 }}
+          whileHover={{ scale: 1.15, rotate: 8 }}
+          whileTap={{ scale: 0.9 }}
+          transition={{ type: "spring", stiffness: 260, damping: 20 }}
+          className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-gold to-ochre text-canvas flex items-center justify-center shadow-2xl animate-pulse-gold float-artwork cursor-pointer"
           aria-label="Open AI Artwork Assistant"
           title="AI Art Assistant"
         >
           <Sparkles className="w-6 h-6" />
-        </button>
+        </motion.button>
       </DialogTrigger>
 
       {/* ── Dialog ───────────────────────────────────────── */}
@@ -195,55 +201,65 @@ const AIChatPopup: React.FC = () => {
 
         {/* ── Messages ─────────────────────────────────────── */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-4">
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}
-            >
-              {msg.type === "assistant" && (
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gold to-ochre flex items-center justify-center flex-shrink-0 mt-1 mr-2">
-                  <Bot className="w-4 h-4 text-canvas" />
-                </div>
-              )}
-              <div
-                className={`max-w-[82%] rounded-2xl p-3.5 text-sm shadow-md ${
-                  msg.type === "user"
-                    ? "bg-terra/80 text-cream rounded-tr-sm"
-                    : "bg-surface-raised border border-surface-border rounded-tl-sm"
-                }`}
+          <AnimatePresence initial={false}>
+            {messages.map((msg) => (
+              <motion.div
+                key={msg.id}
+                initial={{ opacity: 0, y: 15, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className={`flex ${msg.type === "user" ? "justify-end" : "justify-start"}`}
               >
-                {msg.image && (
-                  <img
-                    src={msg.image}
-                    alt="Uploaded"
-                    className="mb-2 max-h-36 rounded-lg object-cover w-full"
-                  />
+                {msg.type === "assistant" && (
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gold to-ochre flex items-center justify-center flex-shrink-0 mt-1 mr-2">
+                    <Bot className="w-4 h-4 text-canvas" />
+                  </div>
                 )}
-                {msg.type === "assistant" ? (
-                  <AIMessageBubble
-                    content={msg.content}
-                    isNew={msg.id === newestMsgId}
-                  />
-                ) : (
-                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
-                )}
-                <p
-                  className={`text-[10px] mt-1.5 ${
-                    msg.type === "user" ? "text-terra-muted/70" : "text-cream-subtle"
+                <div
+                  className={`max-w-[82%] rounded-2xl p-3.5 text-sm shadow-md ${
+                    msg.type === "user"
+                      ? "bg-terra/80 text-cream rounded-tr-sm"
+                      : "bg-surface-raised border border-surface-border rounded-tl-sm"
                   }`}
                 >
-                  {msg.timestamp.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-              </div>
-            </div>
-          ))}
+                  {msg.image && (
+                    <img
+                      src={msg.image}
+                      alt="Uploaded"
+                      className="mb-2 max-h-36 rounded-lg object-cover w-full"
+                    />
+                  )}
+                  {msg.type === "assistant" ? (
+                    <AIMessageBubble
+                      content={msg.content}
+                      isNew={msg.id === newestMsgId}
+                    />
+                  ) : (
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                  )}
+                  <p
+                    className={`text-[10px] mt-1.5 ${
+                      msg.type === "user" ? "text-terra-muted/70" : "text-cream-subtle"
+                    }`}
+                  >
+                    {msg.timestamp.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </AnimatePresence>
 
           {/* Typing indicator */}
           {isLoading && (
-            <div className="flex items-center gap-2">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2"
+            >
               <div className="w-7 h-7 rounded-full bg-gradient-to-br from-gold to-ochre flex items-center justify-center flex-shrink-0">
                 <Bot className="w-4 h-4 text-canvas" />
               </div>
@@ -258,7 +274,7 @@ const AIChatPopup: React.FC = () => {
                   ))}
                 </div>
               </div>
-            </div>
+            </motion.div>
           )}
           <div ref={messagesEndRef} />
         </div>

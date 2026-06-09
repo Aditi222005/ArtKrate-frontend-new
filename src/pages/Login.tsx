@@ -22,7 +22,7 @@ const Login = () => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      await axios.post("http://localhost:4000/api/login", formData, {
+      await axios.post("/api/login", formData, {
         withCredentials: true,
       });
       toast.success("Welcome back!");
