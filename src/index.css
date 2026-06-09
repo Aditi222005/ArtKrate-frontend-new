@@ -1,0 +1,307 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ARTKRATE — Editorial Luxury Design System
+   Dark canvas · Gold accents · Cream text · Terracotta CTAs
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@layer base {
+  :root {
+    /* ── Canvas & Surface ─────────────────────────────────── */
+    --canvas: 24 12% 6%;          /* #0f0d0b near-black warm */
+    --surface: 24 10% 10%;        /* #1a1714 cards */
+    --surface-raised: 24 9% 14%; /* #241f1b elevated cards */
+    --surface-border: 30 15% 20%;/* #3a2e24 borders */
+
+    /* ── Text ─────────────────────────────────────────────── */
+    --cream: 42 40% 93%;          /* #f5f0e8 primary text */
+    --cream-muted: 38 25% 70%;    /* #c4ae90 secondary text */
+    --cream-subtle: 36 15% 45%;   /* #7a6d5e disabled */
+
+    /* ── Gold / Ochre Accent ──────────────────────────────── */
+    --gold: 42 60% 54%;           /* #c9a84c primary accent */
+    --gold-hover: 40 65% 48%;     /* #b8920e hover */
+    --gold-muted: 42 40% 35%;     /* #856c2e muted */
+    --ochre: 36 80% 36%;          /* #a86010 deep ochre */
+
+    /* ── Terracotta CTA ───────────────────────────────────── */
+    --terra: 16 65% 46%;          /* #c0552a terracotta */
+    --terra-hover: 15 68% 40%;    /* #aa4621 hover */
+    --terra-muted: 16 45% 30%;    /* #7a3b1e muted */
+
+    /* ── Admin Blue-Grey ──────────────────────────────────── */
+    --admin-bg: 214 25% 18%;      /* #263341 admin panel bg */
+    --admin-accent: 210 60% 55%;  /* #4d8ec2 admin accent */
+    --admin-border: 213 20% 28%;  /* #374f62 admin border */
+
+    /* ── Status ───────────────────────────────────────────── */
+    --success: 152 50% 42%;
+    --warning: 45 90% 52%;
+    --error: 0 68% 54%;
+
+    /* ── ShadCN compat (mapped to ArtKrate tokens) ─────────── */
+    --background: var(--canvas);
+    --foreground: var(--cream);
+    --card: var(--surface);
+    --card-foreground: var(--cream);
+    --popover: var(--surface-raised);
+    --popover-foreground: var(--cream);
+    --primary: var(--gold);
+    --primary-foreground: var(--canvas);
+    --secondary: var(--surface-raised);
+    --secondary-foreground: var(--cream);
+    --muted: var(--surface);
+    --muted-foreground: var(--cream-muted);
+    --accent: var(--gold-muted);
+    --accent-foreground: var(--cream);
+    --destructive: var(--error);
+    --destructive-foreground: var(--cream);
+    --border: var(--surface-border);
+    --input: var(--surface-raised);
+    --ring: var(--gold);
+    --radius: 0.5rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: hsl(var(--canvas));
+    color: hsl(var(--cream));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Playfair Display', Georgia, serif;
+    letter-spacing: -0.01em;
+  }
+
+  h1 { font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 700; line-height: 1.1; }
+  h2 { font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 600; line-height: 1.2; }
+  h3 { font-size: clamp(1.2rem, 2.5vw, 1.75rem); font-weight: 600; }
+
+  ::selection {
+    background: hsl(var(--gold) / 0.3);
+    color: hsl(var(--cream));
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--canvas));
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--gold-muted));
+    border-radius: 3px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CUSTOM KEYFRAME ANIMATIONS
+   ═══════════════════════════════════════════════════════════════════════════ */
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateX(-20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes pulseGold {
+  0%, 100% { box-shadow: 0 0 0 0 hsl(var(--gold) / 0.4); }
+  50%       { box-shadow: 0 0 0 8px hsl(var(--gold) / 0); }
+}
+
+@keyframes typewriter {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+
+@keyframes blink {
+  0%, 100% { border-color: transparent; }
+  50%       { border-color: hsl(var(--gold)); }
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33%       { transform: translateY(-12px) rotate(1deg); }
+  66%       { transform: translateY(-6px) rotate(-0.5deg); }
+}
+
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPONENT UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer components {
+  /* ── Gold shimmer text ───────────────────────────────────── */
+  .text-gold-gradient {
+    background: linear-gradient(135deg, hsl(var(--gold)) 0%, hsl(var(--ochre)) 50%, hsl(var(--gold)) 100%);
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shimmer 4s linear infinite;
+  }
+
+  /* ── Playfair serif headings ─────────────────────────────── */
+  .font-display {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+
+  /* ── Editorial divider ───────────────────────────────────── */
+  .divider-gold {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, hsl(var(--gold) / 0.5), transparent);
+  }
+
+  /* ── Artwork card hover ring ─────────────────────────────── */
+  .card-hover {
+    @apply transition-all duration-300;
+    border: 1px solid hsl(var(--surface-border));
+  }
+  .card-hover:hover {
+    border-color: hsl(var(--gold) / 0.5);
+    transform: translateY(-4px);
+    box-shadow: 0 20px 60px hsl(var(--canvas) / 0.8), 0 0 0 1px hsl(var(--gold) / 0.2);
+  }
+
+  /* ── Glass surface ───────────────────────────────────────── */
+  .glass {
+    background: hsl(var(--surface) / 0.8);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--surface-border));
+  }
+
+  /* ── Terracotta CTA button ───────────────────────────────── */
+  .btn-terra {
+    background: hsl(var(--terra));
+    color: hsl(var(--cream));
+    @apply font-medium rounded-full px-6 py-3 transition-all duration-200;
+  }
+  .btn-terra:hover {
+    background: hsl(var(--terra-hover));
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px hsl(var(--terra) / 0.4);
+  }
+
+  /* ── Gold outline button ─────────────────────────────────── */
+  .btn-gold-outline {
+    border: 1px solid hsl(var(--gold) / 0.5);
+    color: hsl(var(--gold));
+    @apply font-medium rounded-full px-6 py-3 transition-all duration-200;
+    background: transparent;
+  }
+  .btn-gold-outline:hover {
+    border-color: hsl(var(--gold));
+    background: hsl(var(--gold) / 0.08);
+    box-shadow: 0 0 16px hsl(var(--gold) / 0.15);
+  }
+
+  /* ── Scroll reveal animation ─────────────────────────────── */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.revealed {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ── Stagger delays ──────────────────────────────────────── */
+  .stagger-1 { transition-delay: 0.1s; }
+  .stagger-2 { transition-delay: 0.2s; }
+  .stagger-3 { transition-delay: 0.3s; }
+  .stagger-4 { transition-delay: 0.4s; }
+  .stagger-5 { transition-delay: 0.5s; }
+
+  /* ── Typewriter text ─────────────────────────────────────── */
+  .typewriter-text {
+    overflow: hidden;
+    white-space: pre-wrap;
+    border-right: 2px solid hsl(var(--gold));
+    animation: blink 1s step-end infinite;
+  }
+
+  /* ── Admin panel surface ─────────────────────────────────── */
+  .admin-surface {
+    background: hsl(var(--admin-bg));
+    border: 1px solid hsl(var(--admin-border));
+  }
+
+  /* ── Float animation ─────────────────────────────────────── */
+  .float-artwork {
+    animation: floatSlow 6s ease-in-out infinite;
+  }
+  .float-artwork-delay {
+    animation: floatSlow 6s ease-in-out infinite;
+    animation-delay: -3s;
+  }
+
+  /* ── Input styles (dark theme) ───────────────────────────── */
+  .input-dark {
+    background: hsl(var(--surface-raised));
+    border: 1px solid hsl(var(--surface-border));
+    color: hsl(var(--cream));
+    @apply rounded-lg px-4 py-3 w-full transition-all duration-200;
+  }
+  .input-dark::placeholder {
+    color: hsl(var(--cream-subtle));
+  }
+  .input-dark:focus {
+    outline: none;
+    border-color: hsl(var(--gold) / 0.6);
+    box-shadow: 0 0 0 3px hsl(var(--gold) / 0.1);
+  }
+
+  /* ── Status badge ────────────────────────────────────────── */
+  .badge-verified {
+    background: hsl(152 50% 15%);
+    color: hsl(152 60% 60%);
+    border: 1px solid hsl(152 50% 30%);
+  }
+  .badge-pending {
+    background: hsl(45 80% 15%);
+    color: hsl(var(--gold));
+    border: 1px solid hsl(var(--gold-muted));
+  }
+  .badge-rejected {
+    background: hsl(0 50% 15%);
+    color: hsl(0 68% 70%);
+    border: 1px solid hsl(0 50% 30%);
+  }
+}
