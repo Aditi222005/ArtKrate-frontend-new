@@ -24,7 +24,7 @@ import PageTransition from "./components/PageTransition";
 
 // Global axios config
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = "https://vercel.com/aditisjoshi2005-gmailcoms-projects/artkrate-backend-new/HPWRxYfCzgLgbakweRAHEz2tAKi1";
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || "https://artkrate-backend-new.vercel.app";
 
 const queryClient = new QueryClient({
   defaultOptions: {
