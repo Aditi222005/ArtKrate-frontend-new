@@ -9,6 +9,11 @@ const Signup = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDetectingLocation, setIsDetectingLocation] = useState(false);
+  const [countriesList, setCountriesList] = useState([
+    "India", "United States", "United Kingdom", "Canada", "Australia",
+    "Germany", "France", "Japan", "Brazil", "Mexico", "Italy", "Spain",
+  ]);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -23,6 +28,66 @@ const Signup = () => {
   });
 
   const navigate = useNavigate();
+
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setIsDetectingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const { latitude, longitude } = position.coords;
+        try {
+          const res = await axios.get(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=18&addressdetails=1`
+          );
+
+          if (res.data && res.data.address) {
+            const addr = res.data.address;
+            const road = addr.road || addr.suburb || addr.neighbourhood || "";
+            const city = addr.city || addr.town || addr.village || addr.county || "";
+            const state = addr.state || "";
+            const postcode = addr.postcode || "";
+            const countryName = addr.country || "";
+
+            const addressParts = [road, city, state, postcode].filter(Boolean);
+            const formattedAddress = addressParts.join(", ") || res.data.display_name || "";
+
+            const normalizedCountry = countryName.toLowerCase().replace(/\s+/g, '-');
+            
+            const isCountryInList = countriesList.some(
+              (c) => c.toLowerCase() === countryName.toLowerCase()
+            );
+            if (countryName && !isCountryInList) {
+              setCountriesList((prev) => [...prev, countryName]);
+            }
+
+            setFormData((prev) => ({
+              ...prev,
+              address: formattedAddress,
+              country: normalizedCountry,
+            }));
+
+            toast.success("Location detected successfully!");
+          } else {
+            toast.error("Could not resolve address details.");
+          }
+        } catch (error) {
+          console.error("Geocoding error:", error);
+          toast.error("Failed to fetch location details.");
+        } finally {
+          setIsDetectingLocation(false);
+        }
+      },
+      (error) => {
+        setIsDetectingLocation(false);
+        toast.error("Failed to retrieve location coordinates. Please allow permissions.");
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -59,10 +124,7 @@ const Signup = () => {
     }
   };
 
-  const countries = [
-    "India", "United States", "United Kingdom", "Canada", "Australia",
-    "Germany", "France", "Japan", "Brazil", "Mexico", "Italy", "Spain",
-  ];
+
 
   const SelectField = ({
     label, name, options, placeholder,
@@ -217,12 +279,32 @@ const Signup = () => {
                   </div>
                 </div>
                 <SelectField label="Country" name="country" placeholder="Select country"
-                  options={countries.map(c => ({ value: c.toLowerCase().replace(/\s+/g, '-'), label: c }))} />
+                  options={countriesList.map(c => ({ value: c.toLowerCase().replace(/\s+/g, '-'), label: c }))} />
               </div>
 
               {/* Address */}
               <div>
-                <label htmlFor="address" className="block text-cream-muted text-sm font-medium mb-1.5">Address</label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label htmlFor="address" className="block text-cream-muted text-sm font-medium">Address</label>
+                  <button
+                    type="button"
+                    onClick={handleDetectLocation}
+                    disabled={isDetectingLocation}
+                    className="text-xs text-gold hover:text-gold-hover flex items-center gap-1 font-medium transition-colors disabled:opacity-50"
+                  >
+                    {isDetectingLocation ? (
+                      <>
+                        <div className="w-3 h-3 border border-gold/30 border-t-gold rounded-full animate-spin" />
+                        Detecting...
+                      </>
+                    ) : (
+                      <>
+                        <MapPin className="w-3.5 h-3.5" />
+                        Detect Location
+                      </>
+                    )}
+                  </button>
+                </div>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-cream-subtle" />
                   <input
