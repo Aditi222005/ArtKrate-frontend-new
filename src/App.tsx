@@ -26,6 +26,42 @@ import PageTransition from "./components/PageTransition";
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = import.meta.env.VITE_API_URL || "https://artkrate-backend-new-zz62.vercel.app/";
 
+// Axios Request & Response Interceptors for debugging Vercel deployments
+axios.interceptors.request.use(
+  (config) => {
+    console.log(
+      `🚀 [AXIOS REQUEST] ${config.method?.toUpperCase()} -> ${config.baseURL || ""}${config.url}`,
+      { headers: config.headers, data: config.data }
+    );
+    return config;
+  },
+  (error) => {
+    console.error("❌ [AXIOS REQUEST ERROR]", error);
+    return Promise.reject(error);
+  }
+);
+
+axios.interceptors.response.use(
+  (response) => {
+    console.log(
+      `✅ [AXIOS RESPONSE] ${response.status} <- ${response.config.url}`,
+      response.data
+    );
+    return response;
+  },
+  (error) => {
+    console.error(
+      `❌ [AXIOS RESPONSE ERROR] ${error.response?.status || "NETWORK_ERROR"} <- ${error.config?.url || ""}`,
+      {
+        message: error.message,
+        responseData: error.response?.data,
+        headers: error.response?.headers,
+      }
+    );
+    return Promise.reject(error);
+  }
+);
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
