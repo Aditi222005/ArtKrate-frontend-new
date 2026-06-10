@@ -23,7 +23,7 @@ import PageTransition from "./components/PageTransition";
 
 // Global axios config
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = import.meta.env.VITE_API_URL || "https://artkrate-backend-new.vercel.app";
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || "https://artkrate-backend-new-zz62.vercel.app/";
 
 const queryClient = new QueryClient({
   defaultOptions: {
