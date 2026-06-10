@@ -12,6 +12,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Marketplace from "./pages/Marketplace";
 import Artists from "./pages/Artists";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import Profile from "./pages/Profile";
 import Messages from "./pages/Messages";
@@ -68,6 +69,7 @@ const App = () => (
               <Route path="/signup" element={<PublicRoute><PageTransition><Signup /></PageTransition></PublicRoute>} />
               <Route path="/marketplace" element={<PageTransition><Marketplace /></PageTransition>} />
               <Route path="/artists" element={<PageTransition><Artists /></PageTransition>} />
+              <Route path="/about" element={<PageTransition><About /></PageTransition>} />
               <Route path="/profile" element={<PageTransition><Profile /></PageTransition>} />
               <Route path="/messages" element={<PageTransition><Messages /></PageTransition>} />
               <Route path="/messages/:userId" element={<PageTransition><Messages /></PageTransition>} />

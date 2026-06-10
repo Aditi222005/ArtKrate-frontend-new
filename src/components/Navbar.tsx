@@ -45,6 +45,7 @@ const Navbar = () => {
     { to: "/", label: "Home" },
     { to: "/marketplace", label: "Marketplace" },
     { to: "/artists", label: "Artists" },
+    { to: "/about", label: "About" },
   ];
 
   return (
