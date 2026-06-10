@@ -46,6 +46,128 @@ const useTypewriter = (text: string, speed = 18, active = false) => {
   return displayed;
 };
 
+// ── Markdown Parser for Chatbot Responses ────────────────────────────────────
+const parseInlineMarkdown = (text: string, appendCursor = false) => {
+  const regex = /(\*\*.*?\*\*|`.*?`)/g;
+  const parts = text.split(regex);
+
+  const renderedParts = parts.map((part, i) => {
+    if (part.startsWith("**") && part.endsWith("**")) {
+      const boldText = part.slice(2, -2);
+      if (boldText.endsWith(":")) {
+        return (
+          <span key={i} className="font-semibold text-gold block mt-2 mb-0.5">
+            {boldText}
+          </span>
+        );
+      }
+      return (
+        <strong key={i} className="font-semibold text-gold">
+          {boldText}
+        </strong>
+      );
+    }
+    if (part.startsWith("`") && part.endsWith("`")) {
+      return (
+        <code key={i} className="px-1.5 py-0.5 rounded bg-surface border border-surface-border text-gold font-mono text-xs">
+          {part.slice(1, -1)}
+        </code>
+      );
+    }
+    return part;
+  });
+
+  if (appendCursor) {
+    renderedParts.push(
+      <span key="cursor" className="inline-block w-1.5 h-3.5 bg-gold ml-0.5 align-middle animate-pulse" />
+    );
+  }
+
+  return renderedParts;
+};
+
+const renderMarkdown = (text: string, isTyping = false) => {
+  if (!text) return null;
+
+  const lines = text.split("\n");
+
+  return (
+    <div className="space-y-2">
+      {lines.map((line, index) => {
+        const isLastLine = index === lines.length - 1;
+        const trimmed = line.trim();
+        if (!trimmed) {
+          return (
+            <div key={index} className={isLastLine ? "inline-block" : "h-2"}>
+              {isLastLine && isTyping && (
+                <span className="inline-block w-1.5 h-3.5 bg-gold ml-0.5 align-middle animate-pulse" />
+              )}
+            </div>
+          );
+        }
+
+        // Check for headers
+        let isHeader = false;
+        let headerText = "";
+        if (trimmed.startsWith("### ")) {
+          isHeader = true;
+          headerText = trimmed.replace("### ", "");
+        } else if (trimmed.startsWith("## ")) {
+          isHeader = true;
+          headerText = trimmed.replace("## ", "");
+        } else if (trimmed.startsWith("# ")) {
+          isHeader = true;
+          headerText = trimmed.replace("# ", "");
+        }
+
+        if (isHeader) {
+          return (
+            <h4 key={index} className="font-display font-semibold text-gold text-sm mt-3 mb-1">
+              {parseInlineMarkdown(headerText, isLastLine && isTyping)}
+            </h4>
+          );
+        }
+
+        // Check for bullet list item
+        const isBullet = trimmed.startsWith("* ") || trimmed.startsWith("- ") || trimmed.startsWith("• ");
+        if (isBullet) {
+          const bulletText = trimmed.replace(/^[\*\-\•]\s+/, "");
+          return (
+            <div key={index} className="flex items-start gap-2 pl-1">
+              <span className="text-gold mt-2 flex-shrink-0 w-1 h-1 rounded-full bg-gold/80" />
+              <p className="flex-1 text-sm leading-relaxed text-cream">
+                {parseInlineMarkdown(bulletText, isLastLine && isTyping)}
+              </p>
+            </div>
+          );
+        }
+
+        // Check for numbered list item
+        const numMatch = trimmed.match(/^(\d+)\.\s+(.*)/);
+        if (numMatch) {
+          const num = numMatch[1];
+          const numText = numMatch[2];
+          return (
+            <div key={index} className="flex items-start gap-1.5 pl-1">
+              <span className="text-gold font-medium text-xs mt-0.5 flex-shrink-0 w-4">{num}.</span>
+              <p className="flex-1 text-sm leading-relaxed text-cream">
+                {parseInlineMarkdown(numText, isLastLine && isTyping)}
+              </p>
+            </div>
+          );
+        }
+
+        // Standard paragraph
+        return (
+          <p key={index} className="text-sm leading-relaxed text-cream">
+            {parseInlineMarkdown(line, isLastLine && isTyping)}
+          </p>
+        );
+      })}
+    </div>
+  );
+};
+
 // ── AI Message bubble with typewriter ────────────────────────────────────────
 const AIMessageBubble = ({
   content,
@@ -54,14 +176,13 @@ const AIMessageBubble = ({
   content: string;
   isNew: boolean;
 }) => {
-  const displayed = useTypewriter(content, 15, isNew);
+  const displayed = useTypewriter(content, 10, isNew);
+  const isTyping = isNew && displayed.length < content.length;
+  
   return (
-    <p className="text-sm leading-relaxed text-cream whitespace-pre-wrap">
-      {displayed}
-      {isNew && displayed.length < content.length && (
-        <span className="inline-block w-0.5 h-4 bg-gold ml-0.5 animate-pulse" />
-      )}
-    </p>
+    <div className="w-full">
+      {renderMarkdown(displayed, isTyping)}
+    </div>
   );
 };
 
